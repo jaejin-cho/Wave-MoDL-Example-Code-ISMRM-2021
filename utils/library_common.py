@@ -56,7 +56,7 @@ def mosaic(img, num_row, num_col, fig_num, clim, title = '', use_transpose = Fal
         plt.gray()        
         plt.clim(clim)
         
-    plt.suptitle(title, color='white', fontsize=48)   
+    plt.suptitle(title, color='white', fontsize=20)   
     
 
 ##########################################################
@@ -69,7 +69,7 @@ r2c=lambda x:tf.complex(x[...,0],x[...,1])
 
 def nrmse_loss(y_true, y_pred):
     # return 100 * (K.sqrt(K.sum(K.square(y_pred - y_true)))) / (K.sqrt(K.sum(K.square(y_true))))
-    return 100 * (K.sqrt(K.sum(K.square(y_pred - y_true)))+K.epsilon()) / (K.sqrt(K.sum(K.square(y_true)))+K.epsilon())
+    return 100 * (K.sqrt(K.sum(K.square(y_pred - y_true)))) / (K.sqrt(K.sum(K.square(y_true))))
 
 class tf_fft3_r(Layer):
     def __init__(self, **kwargs):

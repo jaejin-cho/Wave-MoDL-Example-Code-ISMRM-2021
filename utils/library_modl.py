@@ -25,6 +25,22 @@ from tensorflow.keras.models import Model
 # import custom functions 
 import library_common as mf
 
+
+
+##########################################################
+# %%
+# my functions
+##########################################################
+
+def conv3D_bn_nonlinear(x, num_out_chan, kernel_size, activation_type='relu', USE_BN=True, layer_name=''):
+    with K.name_scope(layer_name):
+        x = Conv3D(num_out_chan, kernel_size, activation=None, padding='same', kernel_initializer='truncated_normal')(x)
+        if USE_BN:
+            x = BatchNormalization()(x)
+        if activation_type == 'LeakyReLU':
+            return LeakyReLU()(x)
+        else:
+            return Activation(activation_type)(x)
 ##########################################################
 # %%
 # MoDL functions
@@ -161,10 +177,9 @@ def create_sense_3d(nx, ny, nz, nc, num_block = 10):
                  outputs    =   out_x)
 
 
-def create_modl_3d_ki(nx, ny, nz, nc, nLayers, num_block, activation_type, USE_BN, num_filters = 64):
+def create_modl(nx, ny, nz, nc, nLayers, num_block, num_filters = 64):
 
     # define the inputs
-    input_x     = Input(shape=(nx,ny,nz,2 ), dtype = tf.float32)
     input_c     = Input(shape=(nc,nx,ny,nz), dtype = tf.complex64)
     input_m     = Input(shape=(nx,ny,nz ), dtype = tf.complex64)
     input_Atb   = Input(shape=(nx,ny,nz ), dtype = tf.complex64)
@@ -182,6 +197,7 @@ def create_modl_3d_ki(nx, ny, nz, nc, nLayers, num_block, activation_type, USE_B
         rg_term_i   = RegConv_i(dc_term)        
         rg_term_k   = myIFFT([RegConv_k(myFFT([dc_term]))])        
         rg_term     = UpdateDC.lam_weight2([rg_term_i,rg_term_k])
+        
         # AtA update                 
         rg_term     = Add()([c2r(input_Atb), rg_term])
 
@@ -190,6 +206,6 @@ def create_modl_3d_ki(nx, ny, nz, nc, nLayers, num_block, activation_type, USE_B
 
     out_x = dc_term
         
-    return Model(inputs     =   [input_x, input_c, input_m, input_Atb],
+    return Model(inputs     =   [input_c, input_m, input_Atb],
                  outputs    =   out_x)
 

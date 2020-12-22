@@ -184,9 +184,8 @@ def create_wave_caipi(nx, ny, rz, nc, num_block=10, zpf=3):
                  outputs=out_x)
 
 
-def create_wave_modl(nx, ny, rz, nc, nLayers, num_block, activation_type, USE_BN, num_filters=64, zpf = 3):
+def create_wave_modl(nx, ny, rz, nc, nLayers, num_block, num_filters=64, zpf = 3):
     # define the inputs
-    input_x = Input(shape=(nx, ny, rz, 2), dtype=tf.float32)
     input_c = Input(shape=(nc, nx, ny, rz), dtype=tf.complex64)
     input_m = Input(shape=(zpf*nx, ny, rz), dtype=tf.complex64)
     input_w = Input(shape=(zpf*nx, ny, rz), dtype=tf.complex64)
@@ -213,7 +212,7 @@ def create_wave_modl(nx, ny, rz, nc, nLayers, num_block, activation_type, USE_BN
 
     out_x = dc_term
 
-    return Model(inputs=[input_x, input_c, input_m, input_w, input_Atb],
+    return Model(inputs=[input_c, input_m, input_w, input_Atb],
                  outputs=out_x)
 
 
@@ -252,7 +251,6 @@ def create_wave_modl_joint(nx, ny, rz, ns, nc, nLayers, zpf=3, num_block=10, act
                                num_filters=64, unet_filter=64, init_Unet=False, Unet_name='', init_modl=False,
                                modl_name=''):
     # define the inputs
-    input_x = Input(shape=(nx, ny, rz, 2), dtype=tf.float32)
     input_c = Input(shape=(nc, nx, ny, rz), dtype=tf.complex64)
     input_m = Input(shape=(zpf*nx, ny, rz), dtype=tf.complex64)
     input_w = Input(shape=(zpf*nx, ny, rz), dtype=tf.complex64)
@@ -267,7 +265,7 @@ def create_wave_modl_joint(nx, ny, rz, ns, nc, nLayers, zpf=3, num_block=10, act
         except:
             print('fail to initialize modl')
 
-    dc_term = wave_modl([input_x, input_c, input_m, input_w, input_Atb])
+    dc_term = wave_modl([input_c, input_m, input_w, input_Atb])
 
     # create Unet for segmentation
     Unet = create_unet_seg(nx=nx, ny=ny, nc=nc, ns=ns, activation_type=activation_type,
@@ -285,7 +283,7 @@ def create_wave_modl_joint(nx, ny, rz, ns, nc, nLayers, zpf=3, num_block=10, act
         t = K.expand_dims(Unet([dc_term[:, :, :, slc, :]]), axis=-2)
         seg_class = Concatenate(axis=-2)([seg_class, t])
 
-    return Model(inputs=[input_x, input_c, input_m, input_w, input_Atb],
+    return Model(inputs=[input_c, input_m, input_w, input_Atb],
                  outputs=[dc_term, seg_class])
 
 
